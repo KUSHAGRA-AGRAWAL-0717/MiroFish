@@ -242,26 +242,22 @@ const emit = defineEmits(['refresh', 'toggle-maximize'])
 const graphContainer = ref(null)
 const graphSvg = ref(null)
 const selectedItem = ref(null)
-const showEdgeLabels = ref(true) // 默认显示边标签
-const expandedSelfLoops = ref(new Set()) // 展开的自环项
-const showSimulationFinishedHint = ref(false) // 模拟结束后的提示
-const wasSimulating = ref(false) // 追踪之前是否在模拟中
+const showEdgeLabels = ref(true) 
+const expandedSelfLoops = ref(new Set()) 
+const showSimulationFinishedHint = ref(false) 
+const wasSimulating = ref(false) 
 
-// 关闭模拟结束提示
 const dismissFinishedHint = () => {
   showSimulationFinishedHint.value = false
 }
 
-// 监听 isSimulating 变化，检测模拟结束
 watch(() => props.isSimulating, (newValue, oldValue) => {
   if (wasSimulating.value && !newValue) {
-    // 从模拟中变为非模拟状态，显示结束提示
     showSimulationFinishedHint.value = true
   }
   wasSimulating.value = newValue
 }, { immediate: true })
 
-// 切换自环项展开/折叠状态
 const toggleSelfLoop = (id) => {
   const newSet = new Set(expandedSelfLoops.value)
   if (newSet.has(id)) {
@@ -272,11 +268,9 @@ const toggleSelfLoop = (id) => {
   expandedSelfLoops.value = newSet
 }
 
-// 计算实体类型用于图例
 const entityTypes = computed(() => {
   if (!props.graphData?.nodes) return []
   const typeMap = {}
-  // 美观的颜色调色板
   const colors = ['#FF6B35', '#004E89', '#7B2D8E', '#1A936F', '#C5283D', '#E9724C', '#3498db', '#9b59b6', '#27ae60', '#f39c12']
   
   props.graphData.nodes.forEach(node => {
@@ -289,7 +283,6 @@ const entityTypes = computed(() => {
   return Object.values(typeMap)
 })
 
-// 格式化时间
 const formatDateTime = (dateStr) => {
   if (!dateStr) return ''
   try {
@@ -309,7 +302,7 @@ const formatDateTime = (dateStr) => {
 
 const closeDetailPanel = () => {
   selectedItem.value = null
-  expandedSelfLoops.value = new Set() // 重置展开状态
+  expandedSelfLoops.value = new Set() 
 }
 
 let currentSimulation = null
@@ -319,7 +312,6 @@ let linkLabelBgRef = null
 const renderGraph = () => {
   if (!graphSvg.value || !props.graphData) return
   
-  // 停止之前的仿真
   if (currentSimulation) {
     currentSimulation.stop()
   }
@@ -353,16 +345,13 @@ const renderGraph = () => {
   
   const nodeIds = new Set(nodes.map(n => n.id))
   
-  // 处理边数据，计算同一对节点间的边数量和索引
   const edgePairCount = {}
-  const selfLoopEdges = {} // 按节点分组的自环边
+  const selfLoopEdges = {} 
   const tempEdges = edgesData
     .filter(e => nodeIds.has(e.source_node_uuid) && nodeIds.has(e.target_node_uuid))
   
-  // 统计每对节点之间的边数量，收集自环边
   tempEdges.forEach(e => {
     if (e.source_node_uuid === e.target_node_uuid) {
-      // 自环 - 收集到数组中
       if (!selfLoopEdges[e.source_node_uuid]) {
         selfLoopEdges[e.source_node_uuid] = []
       }
